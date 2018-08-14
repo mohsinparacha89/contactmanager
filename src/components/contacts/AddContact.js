@@ -1,27 +1,25 @@
 import React, { Component } from "react";
-import {Consumer} from "../../context"
-import uuid from "uuid";
+import { Consumer } from "../../context";
 import TextInputGroup from "../layout/TextInputGroup";
+import axios from "axios";
 class AddContact extends Component {
   state = {
     name: "",
     email: "",
-    phoneNumber: "",
-    errors:{
-
-    }
+    phone: "",
+    errors: {}
   };
 
-  onSubmit = (dispatch, e) => {
+  onSubmit = async (dispatch, e) => {
     e.preventDefault();
-    const {name, email, phoneNumber} = this.state;
+    const { name, email, phone } = this.state;
 
     //validation checks
 
-    if(name === ""){
+    if (name === "") {
       this.setState({
-        errors : {
-          name : "Name is Required"
+        errors: {
+          name: "Name is Required"
         }
       });
       return;
@@ -35,72 +33,74 @@ class AddContact extends Component {
       });
       return;
     }
-    if (phoneNumber === "") {
+    if (phone === "") {
       this.setState({
         errors: {
-          phoneNumber: "Phone Number is Required"
+          phone: "Phone Number is Required"
         }
       });
       return;
     }
     const newContact = {
-      id:uuid(),
       name, //or name : name
       email, // or email : email // when left and right are the same you can just put one ;)
-      phoneNumber, 
-    }
+      phone
+    };
+    const res = await axios.post(
+      `http://jsonplaceholder.typicode.com/users`,
+      newContact
+    );
 
-    dispatch({ type: "ADD_CONTACT", payload: newContact});
+    dispatch({ type: "ADD_CONTACT", payload: res.data });
 
     //clearing state
     this.setState({
-      name:"",
-      email:"",
-      phoneNumber : "",
-      errors : {}
+      name: "",
+      email: "",
+      phone: "",
+      errors: {}
     });
     this.props.history.push("/");
-  }
-  onChange = e => this.setState({[e.target.name]: e.target.value});
-
+  };
+  onChange = e => this.setState({ [e.target.name]: e.target.value });
 
   render() {
-    const { name, email, phoneNumber , errors} = this.state;
+    const { name, email, phone, errors } = this.state;
 
-    return(
+    return (
       <Consumer>
         {value => {
-          const {dispatch} = value;
+          const { dispatch } = value;
 
-          return(
+          return (
             <div className="card mb-3">
               <div className="card-header">Add Contact </div>
               <div className="card-body">
-                <form onSubmit={this.onSubmit.bind(this,dispatch)}>
-                    <TextInputGroup 
-                    label = "Name"
-                    name = "name"
-                    placeholder = "Enter Name..."
-                    value = {name}
-                    onChange = {this.onChange}
-                    error = {errors.name}                                      
-                    />
+                <form onSubmit={this.onSubmit.bind(this, dispatch)}>
+                  <TextInputGroup
+                    label="Name"
+                    name="name"
+                    placeholder="Enter Name..."
+                    value={name}
+                    onChange={this.onChange}
+                    error={errors.name}
+                  />
                   <TextInputGroup
                     label="Email"
                     name="email"
                     placeholder="Enter E-mail..."
                     value={email}
-                    type = "email"
+                    type="email"
                     onChange={this.onChange}
-                    error = {errors.email}
+                    error={errors.email}
                   />
                   <TextInputGroup
                     label="Phone Number"
-                    name="phoneNumber"
+                    name="phone"
                     placeholder="Enter Phone Number..."
-                    value={phoneNumber}
+                    value={phone}
                     onChange={this.onChange}
-                    error = {errors.phoneNumber}
+                    error={errors.phone}
                   />
                   <input
                     type="submit"
@@ -110,10 +110,10 @@ class AddContact extends Component {
                 </form>
               </div>
             </div>
-          )
+          );
         }}
       </Consumer>
-    )
+    );
   }
 }
 
